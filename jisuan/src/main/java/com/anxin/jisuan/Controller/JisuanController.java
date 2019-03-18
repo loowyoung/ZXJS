@@ -1,6 +1,8 @@
 package com.anxin.jisuan.Controller;
 
 import com.anxin.jisuan.model.CountVo;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -20,6 +22,7 @@ public class JisuanController {
     @Autowired
     private FileOperation fileOperation;
 
+    @ApiOperation(value="计算示例value", notes="计算示例notes")
     @GetMapping("/getCount")
     @ResponseBody
     public List<CountVo> getCount(double xc, double bx, double betax) {
