@@ -30,9 +30,9 @@ public class Swagger2 {
 
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("springboot利用swagger构建api文档")
-                .description("简单优雅的restfun风格，http://blog.csdn.net/saytime")
-                .termsOfServiceUrl("http://blog.csdn.net/saytime")
+                .title("天地图绘制api文档")
+                .description("在天地图上绘制泄漏区域,https://github.com/loowyoung/ZXJS")
+                .termsOfServiceUrl("https://github.com/loowyoung/ZXJS")
                 .version("1.0")
                 .build();
     }
