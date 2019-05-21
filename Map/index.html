@@ -31,16 +31,18 @@
 
 		<div id="mapDiv"></div>
 		<div>
-			用鼠标在地图上点选获得地理坐标
-			<input type="text" id="lnglatStr" value="" /><br/> xc:
+			地理坐标
+			<input type="text" id="lnglatStr" value="" readonly="true" /><br/> xc:
 			<input id="xc" type="text" value="5.27E+01" /><br/> bx:
 			<input id="bx" type="text" value="5.10E+01" /><br/> betax:
 			<input id="betax" type="text" value="4.16E-01" />
-			<button id="findCount">计算</button>
+			<button id="findCount">计算</button><br />
+			<button onclick="takeScreenshot()">截图</button>
 		</div>
 	</body>
 	<script type="text/javascript" src="http://api.tianditu.gov.cn/api?v=4.0&tk=ddf32507c1b250529ca848518f65fdeb"></script>
 	<script type="text/javascript" src="js/jquery.min.js"></script>
+	<script type="text/javascript" src="js/html2canvas.min.js"></script>
 	<script type="text/javascript" src="js/index.js"></script>
 
 </html>

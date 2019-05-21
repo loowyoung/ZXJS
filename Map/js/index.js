@@ -233,3 +233,37 @@ $('#findCount').click(function() {
 function getLngLat(lnglat) {
 	document.getElementById("lnglatStr").value = lnglat.lng.toFixed(6) + "," + lnglat.lat.toFixed(6);
 }
+
+//网页转图片 ---start---
+function takeScreenshot() {
+	var divText = $("#imagediv").find("option:selected").text();
+	var divName = $("#imagediv").val();
+	html2canvas($("#mapDiv")[0], {
+		useCORS: true //解决天地提底图跨域不能截取的问题
+	}).then(function(canvas) {
+		var type = 'png';
+		var imgData = canvas.toDataURL(type); //canvas转换为图片
+		// 加工image data，替换mime type，方便以后唤起浏览器下载
+		imgData = imgData.replace(_fixType(type), 'image/octet-stream');
+		fileDownload(imgData, 'test');
+	});
+}
+
+function _fixType(type) {
+	type = type.toLowerCase().replace(/jpg/i, 'jpeg');
+	let r = type.match(/png|jpeg|bmp|gif/)[0];
+	return 'image/' + r;
+};
+
+//唤起浏览器下载
+function fileDownload(downloadUrl, imageName) {
+	let aLink = document.createElement('a');
+	aLink.style.display = 'none';
+	aLink.href = downloadUrl;
+	aLink.download = imageName + '.png';
+	// 触发点击-然后移除
+	document.body.appendChild(aLink);
+	aLink.click();
+	document.body.removeChild(aLink);
+}
+//网页转图片 ---end---
