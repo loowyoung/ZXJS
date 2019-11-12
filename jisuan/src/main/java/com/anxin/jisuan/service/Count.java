@@ -1,4 +1,4 @@
-package com.anxin.jisuan.Controller;
+package com.anxin.jisuan.service;
 
 
 import com.anxin.jisuan.common.Equation;
