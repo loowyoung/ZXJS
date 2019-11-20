@@ -85,6 +85,13 @@
             <artifactId>webmagic-extension</artifactId>
             <version>0.7.3</version>
         </dependency>
+
+        <!--EasyExcel是一个基于Java的简单、省内存的读写Excel的开源项目-->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>easyexcel</artifactId>
+            <version>2.1.1</version>
+        </dependency>
         
     </dependencies>
 
