@@ -3,3 +3,6 @@ server:
 
 SLAB:
   filePath: D:/gitFile/github/ZXJS #OUTPR4 文件位置
+
+security:
+  enabled: false
