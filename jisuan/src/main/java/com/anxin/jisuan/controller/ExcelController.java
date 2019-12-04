@@ -4,6 +4,7 @@ import com.alibaba.excel.EasyExcel;
 import com.anxin.jisuan.dao.UploadDAO;
 import com.anxin.jisuan.model.UploadData;
 import com.anxin.jisuan.util.UploadDataListener;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -32,7 +33,7 @@ public class ExcelController {
      * <p>2. 由于默认异步读取excel，所以需要创建excel一行一行的回调监听器
      * <p>3. 直接读即可
      */
-    @ApiOperation(value = "Excel导入value", notes = "Excel导入notes")
+    @ApiOperation(value = "Excel导入简称", notes = "Excel导入描述")
     @PostMapping("upload")
     @ResponseBody
     public String upload(MultipartFile file) throws IOException {
