@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.anxin.accidentsimulation.dao.ChemicalDao">
+    <!-- 化学物质实体类 -->
+    <resultMap id="hxwzResultMap" type="com.anxin.accidentsimulation.entity.dto.ChemicalModel">
+        <id property="systemId" column="SYSTEMID"/>
+        <result property="sourceName" column="SOURCE_NAME"/>
+        <result property="sourceCname" column="SOURCE_CNANE"/>
+        <result property="wms" column="WMS"/>
+        <result property="tbp" column="TBP"/>
+        <result property="cps" column="CPS"/>
+        <result property="dhe" column="DHE"/>
+        <result property="cpsl" column="CPSL"/>
+        <result property="spb" column="SPB"/>
+        <result property="rhosl" column="RHOSL"/>
+        <result property="spc" column="SPC"/>
+        <result property="adiabaticIndex" column="adiabatic_index"/>
+        <result property="relativeDensity" column="relativeDensity"/>
+        <result property="erpg_1" column="erpg_one"/>
+        <result property="erpg_2" column="erpg_two"/>
+        <result property="erpg_3" column="erpg_three"/>
+        <result property="aegl_1" column="aegl_one"/>
+        <result property="aegl_2" column="aegl_two"/>
+        <result property="aegl_3" column="aegl_three"/>
+        <result property="teel_1" column="teel_one"/>
+        <result property="teel_2" column="teel_two"/>
+        <result property="teel_3" column="teel_three"/>
+        <result property="idlh" column="idlh"/>
+        <result property="hc" column="HC"/>
+        <result property="rhos" column="RHOS"/>
+        <result property="mf" column="MF"/>
+    </resultMap>
+
+    <!-- 查询化学物质 -->
+    <select id="list" parameterType="String" resultMap="hxwzResultMap">
+        SELECT
+        SYSTEMID,
+        SOURCE_CNANE,
+        SOURCE_NAME,
+        WMS,
+        CPS,
+        TBP,
+        DHE,
+        CPSL,
+        RHOSL,
+        SPB,
+        SPC,
+        adiabatic_index,
+        relativeDensity,
+        erpg_one,
+        erpg_two,
+        erpg_three,
+        aegl_one,
+        aegl_two,
+        aegl_three,
+        teel_one,
+        teel_two,
+        teel_three,
+        idlh,
+        HC,
+        RHOS,
+        MF
+        FROM
+        t_yjzm_zxjs_hxwz
+        WHERE 1=1
+        <if test="sourceName != null and sourceName != ''">
+            and SOURCE_NAME like CONCAT('%',#{sourceName},'%')
+        </if>
+    </select>
+
+</mapper>
