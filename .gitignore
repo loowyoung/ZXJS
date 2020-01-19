@@ -1,2 +1,5 @@
 .idea/
 Map/.project
+netty-file/netty-server/target/
+netty-file/netty-client/target/
+*.iml
