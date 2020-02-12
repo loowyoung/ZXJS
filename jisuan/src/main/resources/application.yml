@@ -6,3 +6,11 @@ SLAB:
 
 security:
   enabled: false
+
+#windows共享文件
+share:
+  ip: 127.0.0.1 #共享机器的ip
+  username: yan #共享文件夹的用户名
+  password: 123 #共享文件夹的密码
+  dir: logs #共享文件夹的目录
+  filename: modelInfos.log #共享文件名
