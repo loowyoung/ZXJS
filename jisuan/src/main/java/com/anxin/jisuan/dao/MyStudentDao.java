@@ -12,4 +12,8 @@ import java.util.List;
 @Mapper
 public interface MyStudentDao {
     List<MyStudentModel> findAll();
+
+    Object findMapBySql(String s, List<Object> objects);
+
+    Object findTotalCountBySql(String s, Object any);
 }

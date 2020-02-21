@@ -24,12 +24,6 @@ public class ChemicalController {
     @Autowired
     private ChemicalService service;
 
-    @ApiOperation(value = "查询单条", notes = "查询单条化学物质")
-    @PostMapping("/query")
-    public void query(String id) {
-        return;
-    }
-
     @ApiOperation(value = "查询所有", notes = "查询所有化学物质")
     @PostMapping("/list")
     public List<ChemicalModel> list() {

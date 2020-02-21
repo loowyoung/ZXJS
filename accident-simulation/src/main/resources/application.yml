@@ -16,5 +16,5 @@ mybatis:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #打印SQL
 
 slab: #SLAB.exe 文件路径
-  path: D:\IdeaProjects\accident-simulation\src\main\resources\slab
+  path: D:\gitFile\github\ZXJS\accident-simulation\src\main\resources\slab
 
