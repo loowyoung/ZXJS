@@ -1,6 +1,7 @@
 package com.anxin.accidentsimulation;
 
 import io.swagger.annotations.ApiOperation;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.ApiInfoBuilder;
@@ -17,6 +18,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  * http://localhost:8081/swagger-ui.html
  */
 @Configuration
+@ConditionalOnProperty(prefix = "swagger", value = {"enable"}, havingValue = "true")
 @EnableSwagger2
 public class Swagger2 {
 

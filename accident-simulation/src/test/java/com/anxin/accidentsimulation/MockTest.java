@@ -19,13 +19,13 @@ import org.springframework.web.context.WebApplicationContext;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AccidentSimulationApplication.class)
 @AutoConfigureMockMvc
-public class MockTest {
+public abstract class MockTest {
     @Autowired
     private WebApplicationContext webApplicationContext;
     protected MockMvc mockMvc;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
     }
 }

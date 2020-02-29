@@ -17,6 +17,8 @@
 
     <properties>
         <java.version>1.8</java.version>
+        <proguard.version>6.2.0</proguard.version>
+        <proguard.maven.plugin.version>2.2.0</proguard.maven.plugin.version>
     </properties>
 
     <dependencies>
@@ -71,8 +73,87 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>com.github.wvengen</groupId>
+                <artifactId>proguard-maven-plugin</artifactId>
+                <version>${proguard.maven.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>proguard</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <proguardVersion>${proguard.version}</proguardVersion>
+                    <injar>${project.build.finalName}.jar</injar>
+                    <outjar>${project.build.finalName}.jar</outjar>
+                    <!--是否开启混淆-->
+                    <obfuscate>true</obfuscate>
+                    <options>
+                        <!--默认是开启的，这里关闭shrink，即不删除没有使用的类/成员-->
+                        <option>-dontshrink</option>
+                        <!--默认是开启的，这里关闭字节码级别的优化-->
+                        <option>-dontoptimize</option>
+                        <!--混淆类名之后，对使用Class.forName('className')之类的地方进行相应替代-->
+                        <option>-adaptclassstrings</option>
+                        <!-- 不混淆所有特殊的类-->
+                        <option>-keepattributes Exceptions,InnerClasses,Signature,Deprecated,
+                            SourceFile,LineNumberTable,*Annotation*,EnclosingMethod
+                        </option>
+                        <option>-keepnames interface **</option>
+                        <!--对于类成员的命名的混淆采取唯一策略-->
+                        <option>-useuniqueclassmembernames</option>
+                        <!--<option>-keeppackagenames</option>-->
+                        <!--保留main方法的类及其方法名-->
+                        <option>-keep
+                            class com.anxin.accidentsimulation.AccidentSimulationApplication {
+                            public static void main(java.lang.String[]);
+                            }
+                        </option>
+                        <!--不理会警告，否则混淆失败-->
+                        <option>-ignorewarnings</option>
+                        <option>-keep class !com.anxin.accidentsimulation.** { *; }</option>
+                        <option>-keep class com.anxin.accidentsimulation.dao.* { *; }</option>>
+                        <option>-keep class com.anxin.accidentsimulation.entity.*.* { *; }</option>
+                        <option>-keep class com.anxin.accidentsimulation.Swagger2 { *; }</option>
+                        <option>-keep interface * extends * { *; }</option>
+                        <!--##保留枚举成员及方法-->
+                        <option>-keepclassmembers enum * { *; }</option>
+                        <option>-keepclassmembers class * {
+                            @org.springframework.beans.factory.annotation.Autowired *;
+                            @org.springframework.beans.factory.annotation.Value *;
+                            }
+                        </option>
+                    </options>
+                    <injarNotExistsSkip>true</injarNotExistsSkip>
+                    <libs>
+                        <lib>${java.home}/lib/rt.jar</lib>
+                        <lib>${java.home}/lib/jce.jar</lib>
+                    </libs>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.sf.proguard</groupId>
+                        <artifactId>proguard-base</artifactId>
+                        <version>${proguard.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.anxin.accidentsimulation.AccidentSimulationApplication</mainClass>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
