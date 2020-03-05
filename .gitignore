@@ -5,3 +5,4 @@ netty-file/netty-client/target/
 *.iml
 accident-simulation/target/
 accident-simulation/src/main/resources/slab/
+watchdog/.mvn/
