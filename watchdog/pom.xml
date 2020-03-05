@@ -20,7 +20,9 @@
         <oshi.version>4.4.2</oshi.version>
         <jna.version>5.5.0</jna.version>
         <jnaPlatform.version>5.5.0</jnaPlatform.version>
-        <netty.version>4.1.46.Final</netty.version>
+        <swagger.version>2.7.0</swagger.version>
+        <mybatis.version>2.1.1</mybatis.version>
+        <mybatisplus.version>3.3.1</mybatisplus.version>
     </properties>
 
     <dependencies>
@@ -28,6 +30,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <!--web-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <!--mongoDB-->
         <dependency>
@@ -58,11 +65,28 @@
             <artifactId>jna-platform</artifactId>
             <version>${jnaPlatform.version}</version>
         </dependency>
-        <!--netty-->
+        <!--swagger2-->
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>${netty.version}</version>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>${swagger.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>${swagger.version}</version>
+        </dependency>
+        <!--mybatis-plus-->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${mybatisplus.version}</version>
+        </dependency>
+        <!--postgresql-->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 

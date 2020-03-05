@@ -11,6 +11,8 @@ import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
 import oshi.util.Util;
 
+import static java.lang.System.getProperty;
+
 /**
  * 系统信息获取工具类
  *
@@ -119,6 +121,18 @@ public class SystemInfoUtil {
         float diskUsage = Float.valueOf(used) / Float.valueOf(total);
         logger.info("磁盘使用率：{}。磁盘使用量：used-{},total-{}", diskUsage, used, total);
         return diskUsage;
+    }
+
+    /**
+     * 获取操作系统名称
+     *
+     * @return
+     */
+    public static String getOsName() {
+        String osName = getProperty("os.name");
+        String archName = getProperty("os.arch");
+        logger.info("操作系统名称：{}。架构名称：{}", osName, archName);
+        return osName;
     }
 
 }
