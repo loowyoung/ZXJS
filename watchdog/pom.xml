@@ -37,10 +37,10 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <!--mongoDB-->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
-        </dependency>
+        <!--<dependency>-->
+        <!--    <groupId>org.springframework.boot</groupId>-->
+        <!--    <artifactId>spring-boot-starter-data-mongodb</artifactId>-->
+        <!--</dependency>-->
         <!--lombok-->
         <dependency>
             <groupId>org.projectlombok</groupId>

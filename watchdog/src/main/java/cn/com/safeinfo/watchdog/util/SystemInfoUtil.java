@@ -135,4 +135,13 @@ public class SystemInfoUtil {
         return osName;
     }
 
+    public static String getHost() {
+        return null;
+    }
+
+    public static int getTcpCount(Process process) {
+        //process.
+        return 0;
+    }
+
 }

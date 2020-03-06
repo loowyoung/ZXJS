@@ -6,7 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import oshi.jna.platform.windows.Kernel32;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 
 /**
  * 系统内操作工具类
@@ -52,11 +54,41 @@ public class SystemExecUtil {
         return pid;
     }
 
-    public static Process execCommand(String cmd) throws Exception {
-        Process process = Runtime.getRuntime().exec(cmd);
-        //int status = process.waitFor();
-        logger.info("执行命令：{}", cmd);
-        return process;
+    /**
+     * 执行windows命令
+     *
+     * @param cmd
+     * @return
+     */
+    public static Process execCommand(String cmd) {
+        try {
+            Process process = Runtime.getRuntime().exec(cmd);
+            //int status = process.waitFor();
+            logger.info("执行命令：{}", cmd);
+            return process;
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.warn("执行命令失败：{}", cmd);
+            return null;
+        }
     }
-    
+
+    /**
+     * 执行Linux命令你
+     *
+     * @param cmd
+     * @return
+     */
+    public static Process execCommand(String[] cmd) {
+        try {
+            Process process = Runtime.getRuntime().exec(cmd);
+            logger.info("执行命令：{}", Arrays.toString(cmd));
+            return process;
+        } catch (IOException e) {
+            e.printStackTrace();
+            logger.warn("执行命令失败：{}", Arrays.toString(cmd));
+            return null;
+        }
+    }
+
 }

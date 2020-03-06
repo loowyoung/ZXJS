@@ -1,10 +1,14 @@
 package cn.com.safeinfo.watchdog.model.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.sql.Timestamp;
 
 /**
  * 模块实体类
@@ -24,7 +28,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @TableName("sys.tb_sys_service_module")
 public class ModuleModel {
-    @TableField("service_name")
+    @TableId(value = "service_name", type = IdType.AUTO)
     private String serviceName;//主键，固定的服务名称
     @TableField("service_desc")
     private String serviceDesc;//服务描述
@@ -41,7 +45,7 @@ public class ModuleModel {
     @TableField("status")
     private String status;//运行状态，0：停止；1：运行
     @TableField("update_time")
-    private String updateTime;//最近更新时间
+    private Timestamp updateTime;//最近更新时间
     @TableField("watchdog_host")
     private String watchdogHost;//看门狗服务地址，IP或Hostname
     @TableField("watchdog_port")

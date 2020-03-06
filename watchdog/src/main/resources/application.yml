@@ -7,13 +7,14 @@ spring:
   datasource:
     url: jdbc:postgresql://10.10.3.1:5432/hrmw
     username: postgres
-    password: Axpgadmin12#$
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017/test
-      username:
-      password:
-
-mybatis-plus:
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #打印SQL
+    password: Axpgadmin12#$cd
+#  data:
+#    mongodb:
+#      uri: mongodb://localhost:27017/test
+#      username:
+#      password:
+  servlet:
+    multipart:
+      enabled: true #开启上传文件大小管理
+      max-file-size: 50MB #单个文件的最大上限
+      max-request-size: 60MB #单个请求的文件总大小上限
