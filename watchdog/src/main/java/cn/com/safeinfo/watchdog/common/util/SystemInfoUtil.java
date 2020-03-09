@@ -11,6 +11,8 @@ import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
 import oshi.util.Util;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import static java.lang.System.getProperty;
@@ -23,10 +25,10 @@ import static java.lang.System.getProperty;
  */
 public class SystemInfoUtil {
     private static final Logger logger = LoggerFactory.getLogger(SystemInfoUtil.class);
-    private static SystemInfo systemInfo = new SystemInfo();
-    private static HardwareAbstractionLayer hal = systemInfo.getHardware();
-    private static GlobalMemory memory = hal.getMemory();
-    private static OperatingSystem operatingSystem = systemInfo.getOperatingSystem();
+    private static SystemInfo systemInfo = new SystemInfo();//系统信息
+    private static HardwareAbstractionLayer hal = systemInfo.getHardware();//硬件抽象层。提供对硬件项（如处理器、内存、电池和磁盘）的访问。
+    private static GlobalMemory memory = hal.getMemory();//有关计算机物理内存（RAM）以及任何可用虚拟内存的使用信息。
+    private static OperatingSystem operatingSystem = systemInfo.getOperatingSystem();//操作系统（OS）是计算机上的软件，它管理不同程序使用硬件的方式，并调节用户控制计算机的方式。
 
     /**
      * 获取服务器CPU使用率
@@ -57,7 +59,7 @@ public class SystemInfoUtil {
         long steal = ticks[CentralProcessor.TickType.STEAL.getIndex()] - prevTicks[CentralProcessor.TickType.STEAL.getIndex()];
         long totalCpu = user + nice + sys + idle + iowait + irq + softirq + steal;
         float cpuUsage = Float.valueOf(user + sys) / Float.valueOf(totalCpu);
-        logger.debug("CPU使用率：{}。CPU使用量：user-{},sys-{}，totalCpu-{}", cpuUsage, user, sys, totalCpu);
+        logger.info("CPU使用率：{}。CPU使用量：user-{},sys-{}，totalCpu-{}", cpuUsage, user, sys, totalCpu);
         return cpuUsage;
     }
 
@@ -126,6 +128,33 @@ public class SystemInfoUtil {
     }
 
     /**
+     * 获取TCP连接数
+     *
+     * @param pid 进程号
+     * @return
+     */
+    public static String getTcpCount(int pid) {
+        String osName = getOsName();
+        Process process = null;
+        List<String> commandResult;
+        if (osName.contains("Windows")) {
+            String cmd = "cmd /c netstat -ano | find \"" + pid + "\" /c";
+            process = SystemExecUtil.execCommand(cmd);
+        } else if (osName.contains("Linux")) {
+            String[] cmd = new String[3];
+            cmd[0] = "/bin/sh";
+            cmd[1] = "-c";
+            cmd[2] = "netstat -atp | grep " + pid + " | wc -l";
+            process = SystemExecUtil.execCommand(cmd);
+        } else {
+            logger.warn("未知的操作系统：{}", osName);
+        }
+        commandResult = SystemExecUtil.getCommandResult(process);
+        logger.info("TCP连接数：{}", commandResult.toString());
+        return commandResult.get(0);
+    }
+
+    /**
      * 获取操作系统名称
      *
      * @return
@@ -137,40 +166,22 @@ public class SystemInfoUtil {
         return osName;
     }
 
-    public static String getHost() {
-        return null;
-    }
-
-    public static int getTcpCount(int pid) {
-        String osName = getOsName();
-        List<String> tcpCount = null;
-        if (osName.contains("Windows")) {
-            try {
-                String cmd = "cmd /c netstat -ano | findstr 80";
-                //String[] cmd = new String[4];
-                //cmd[0] = "cmd /k";
-                //cmd[1] = "tasklist";
-                //cmd[2] = "|";
-                //cmd[3] = "findstr chrome";
-                Process process = SystemExecUtil.execCommand(cmd);
-                //Process process = new ProcessBuilder(cmd).start();
-                tcpCount = SystemExecUtil.getCommandResult(process);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            logger.info("TCP连接数：{}", tcpCount.toString());
-        } else if (osName.contains("Linux")) {
-
-        } else {
-            logger.warn("未知的操作系统：{}", osName);
+    /**
+     * 获取主机名称
+     *
+     * @return
+     */
+    public static String getHostName() {
+        InetAddress ia = null;
+        try {
+            ia = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
         }
-        //process.
-        return 0;
-    }
-
-    public static void main(String[] args) {
-        int count = getTcpCount(14596);
-        System.out.println("TCP连接数：" + count);
+        String host = ia.getHostName();//获取计算机主机名
+        String IP = ia.getHostAddress();//获取计算机IP
+        logger.info("计算机主机名：{}", host);
+        return host;
     }
 
 }

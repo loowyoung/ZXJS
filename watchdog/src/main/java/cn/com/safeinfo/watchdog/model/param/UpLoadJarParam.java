@@ -17,4 +17,6 @@ public class UpLoadJarParam {
     private String serviceName;
     @ApiModelProperty(value = "服务版本", required = true)
     private String version;
+    @ApiModelProperty(value = "服务描述", required = true)
+    private String serviceDesc;
 }

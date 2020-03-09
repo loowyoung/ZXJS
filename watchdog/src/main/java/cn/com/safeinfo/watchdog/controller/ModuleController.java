@@ -37,29 +37,35 @@ public class ModuleController {
         return ResultUtil.success(model);
     }
 
+    @ApiOperation(value = "查询单个服务", notes = "查询单个服务的信息，并检查该服务运行状态")
+    @PostMapping("/query")
+    public JsonResult query(@RequestParam(value = "moduleName") @ApiParam(value = "模块名", required = true) String moduleName) {
+        return moduleService.queryModule(moduleName);
+    }
+
     @ApiOperation(value = "上传服务", notes = "上传服务的jar包")
     @PostMapping("/upload")
-    public JsonResult serviceUpload(@RequestParam("file") @ApiParam("jar包") MultipartFile file,
+    public JsonResult serviceUpload(@RequestParam(value = "file") @ApiParam(value = "jar包", required = true) MultipartFile file,
                                     UpLoadJarParam param) {
         return moduleService.saveModule(file, param);
     }
 
     @ApiOperation(value = "启动服务", notes = "根据模块名启动服务")
     @PostMapping("/start")
-    public JsonResult serviceStart(@RequestParam("moduleName") @ApiParam("模块名") String moduleName) {
+    public JsonResult serviceStart(@RequestParam("moduleName") @ApiParam(value = "模块名", required = true) String moduleName) {
         return moduleService.startModule(moduleName);
     }
 
     @ApiOperation(value = "停止服务", notes = "根据模块名停止服务")
     @PostMapping("/stop")
-    public JsonResult serviceStop(String moduleName) {
+    public JsonResult serviceStop(@RequestParam("moduleName") @ApiParam(value = "模块名", required = true) String moduleName) {
         return moduleService.stopModule(moduleName);
     }
 
     @ApiOperation(value = "重启服务", notes = "根据模块名重启服务")
     @PostMapping("/restart")
-    public JsonResult serviceRestart(String moduleName) {
-        return ResultUtil.success("测试");
+    public JsonResult serviceRestart(@RequestParam("moduleName") @ApiParam(value = "模块名", required = true) String moduleName) {
+        return moduleService.restartModule(moduleName);
     }
 
 }

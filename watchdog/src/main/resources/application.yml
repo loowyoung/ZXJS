@@ -5,14 +5,10 @@ server:
 
 spring:
   datasource:
+    driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://10.10.3.1:5432/hrmw
     username: postgres
-    password: Axpgadmin12#$cd
-  #  data:
-  #    mongodb:
-  #      uri: mongodb://localhost:27017/test
-  #      username:
-  #      password:
+    password: Axpgadmin12#$
   servlet:
     multipart:
       enabled: true #开启上传文件大小管理

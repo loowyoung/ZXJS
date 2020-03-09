@@ -67,7 +67,6 @@ public class SystemExecUtil {
     public static Process execCommand(String cmd) {
         try {
             Process process = Runtime.getRuntime().exec(cmd);
-            //int status = process.waitFor();
             logger.info("执行命令：{}", cmd);
             return process;
         } catch (Exception e) {
@@ -106,12 +105,16 @@ public class SystemExecUtil {
         BufferedReader bufrIn;
         BufferedReader bufrError;
         try {
-            // 方法阻塞, 等待命令执行完成（成功会返回0）
+            //方法阻塞, 等待命令执行完成（成功会返回0）
             int execResult = process.waitFor();
-            // 获取命令执行结果, 有两个结果: 正常的输出 和 错误的输出（PS: 子进程的输出就是主进程的输入）
+            if (0 != execResult) {
+                logger.warn("获取进程执行结果失败,状态码【{}】", execResult);
+                return null;
+            }
+            //获取命令执行结果,有两个结果:正常的输出和错误的输出（PS:子进程的输出就是主进程的输入）
             bufrIn = new BufferedReader(new InputStreamReader(process.getInputStream(), "GBK"));
             bufrError = new BufferedReader(new InputStreamReader(process.getErrorStream(), "GBK"));
-            // 读取输出
+            //读取输出
             String line;
             while ((line = bufrIn.readLine()) != null) {
                 result.add(line);
@@ -123,6 +126,7 @@ public class SystemExecUtil {
             e.printStackTrace();
             logger.warn("获取进程执行结果失败：{}", e.getMessage());
         }
+        logger.info("获取进程执行结果：{}", result);
         return result;
     }
 

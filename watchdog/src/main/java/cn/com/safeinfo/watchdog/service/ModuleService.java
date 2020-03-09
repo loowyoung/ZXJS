@@ -12,12 +12,15 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import oshi.util.Util;
 
 import java.io.*;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * 服务模块 服务类
@@ -28,8 +31,48 @@ import java.sql.Timestamp;
 @Service
 public class ModuleService extends ServiceImpl<ModuleDao, ModuleModel> {
     private static final Logger logger = LoggerFactory.getLogger(ModuleService.class);
-    //watchdog的jar包所在路径
-    private static final String watchPath = System.getProperty("user.dir") + File.separator + "watchdog-projects";
+    private static final String watchPath = System.getProperty("user.dir") + File.separator + "watchdog-projects";//watchdog的jar包所在路径
+    @Value("${server.port}")
+    private String port;//看门狗的端口
+
+    /**
+     * 查询单个服务模块的信息，并更新运行状态
+     *
+     * @param moduleName 服务名
+     * @return
+     */
+    public JsonResult queryModule(String moduleName) {
+        ModuleModel model = this.getById(moduleName);//根据服务名查询服务
+        String pidPath = watchPath + File.separator + moduleName + ".pid";//进程号文件
+        File pidFile = new File(pidPath);
+        if (null == model) {
+            return ResultUtil.error(500, Status.SERVICE_NOT_FOUND.value());
+        } else if ("0".equals(model.getStatus()) || !pidFile.exists()) {//程序已停止或没有进程号文件
+            return ResultUtil.error(500, Status.SERVICE_STOPPED.value());//服务已停止
+        }
+        String pid = readFile(pidFile);
+        String osName = SystemInfoUtil.getOsName();
+        Process process = null;//执行命令后的进程
+        if (osName.contains("Windows")) {
+            process = SystemExecUtil.execCommand("cmd /c jps | findstr \"" + pid + "\"");//查询进程是否存在
+        } else if (osName.contains("Linux")) {
+            String[] cmd = new String[3];
+            cmd[0] = "/bin/sh";
+            cmd[1] = "-c";
+            cmd[2] = "jps -l | grep " + pid;
+            process = SystemExecUtil.execCommand(cmd);//查询进程是否存在
+        }
+        List<String> cmdResult = SystemExecUtil.getCommandResult(process);//命令的返回值
+        if (null == cmdResult || cmdResult.size() != 1) {
+            model.setStatus("0");//运行状态，0：停止；1：运行
+            Timestamp now = new Timestamp(System.currentTimeMillis());//当前时间
+            model.setUpdateTime(now);//更新时间
+            this.updateById(model);
+            deleteFile(pidPath);//删除进程号文件
+            return ResultUtil.error(500, Status.SERVICE_STOPPED.value());
+        }
+        return ResultUtil.success(Status.SERVICE_STARTED.value());
+    }
 
     /**
      * 保存服务信息
@@ -58,6 +101,8 @@ public class ModuleService extends ServiceImpl<ModuleDao, ModuleModel> {
         File dest = upLoadFile(file);//上传jar包
         BeanUtils.copyProperties(param, model);
         model.setFilePath(dest.getAbsolutePath());//当前版本路径
+        model.setWatchdogHost(SystemInfoUtil.getHostName());
+        model.setWatchdogPort(port);
         model.setUpdateTime(now);//更新时间
         this.updateById(model);
         return ResultUtil.success(Status.JAR_UPLOAD_SUCCESS.value());
@@ -71,8 +116,16 @@ public class ModuleService extends ServiceImpl<ModuleDao, ModuleModel> {
      */
     public JsonResult startModule(String moduleName) {
         ModuleModel model = this.getById(moduleName);//根据服务名查询服务
+        if (null == model) {
+            return ResultUtil.error(500, Status.SERVICE_NOT_FOUND.value());
+        }
+        String pidPath = watchPath + File.separator + moduleName + ".pid";//进程号文件
+        File pidFile = new File(pidPath);
+        if (pidFile.exists()) {
+            return ResultUtil.error(500, Status.SERVICE_STARTED.value(), readFile(pidFile));//服务已启动
+        }
         String osName = SystemInfoUtil.getOsName();//系统名称
-        Process process = null;//启动jar包
+        Process process = null;//启动jar包后的进程
         File jarFile = new File(model.getFilePath());
         if (!jarFile.exists()) {
             return ResultUtil.error(500, Status.JAR_NOT_FOUND.value());//如果jar包不存在
@@ -87,8 +140,6 @@ public class ModuleService extends ServiceImpl<ModuleDao, ModuleModel> {
             process = SystemExecUtil.execCommand(cmd);//启动jar包
         }
         Long pid = SystemExecUtil.getProcessID(process);//获取进程号
-        File pidFile = new File(watchPath + File.separator + moduleName + ".pid");//创建进程文件
-        deleteFile(pidFile.getAbsolutePath());//删除存在的进程文件
         writeFile(pidFile, pid.toString());//将进程号写入进程文件
         if (pid.equals(-1)) {//如果没有进程号
             return ResultUtil.error(500, Status.SERVICE_STARTED_FAIL.value());
@@ -97,7 +148,7 @@ public class ModuleService extends ServiceImpl<ModuleDao, ModuleModel> {
             model.setStatus("1");//设置服务状态已启动
             model.setUpdateTime(now);
             this.updateById(model);
-            return ResultUtil.success(Status.SERVICE_STARTED.value());
+            return ResultUtil.success(Status.SERVICE_STARTED_SUCCESS.value());
         }
     }
 
@@ -132,7 +183,19 @@ public class ModuleService extends ServiceImpl<ModuleDao, ModuleModel> {
         model.setStatus("0");//设置服务状态已启动
         model.setUpdateTime(now);
         this.updateById(model);
-        return ResultUtil.success(Status.SERVICE_STOPPED.value());
+        return ResultUtil.success(Status.SERVICE_STOPPED_SUCCESS.value());
+    }
+
+    /**
+     * 重启jar包
+     *
+     * @param moduleName
+     * @return
+     */
+    public JsonResult restartModule(String moduleName) {
+        JsonResult stopResult = stopModule(moduleName);//停止jar包
+        Util.sleep(1000);
+        return startModule(moduleName);//启动jar包
     }
 
     /**
