@@ -1,4 +1,4 @@
-package cn.com.safeinfo.watchdog.util.result;
+package cn.com.safeinfo.watchdog.common.result;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

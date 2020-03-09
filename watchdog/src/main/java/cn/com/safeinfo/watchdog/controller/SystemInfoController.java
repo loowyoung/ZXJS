@@ -1,7 +1,7 @@
 package cn.com.safeinfo.watchdog.controller;
 
-import cn.com.safeinfo.watchdog.util.result.JsonResult;
-import cn.com.safeinfo.watchdog.util.result.ResultUtil;
+import cn.com.safeinfo.watchdog.common.result.JsonResult;
+import cn.com.safeinfo.watchdog.common.result.ResultUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.PostMapping;

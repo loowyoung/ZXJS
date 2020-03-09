@@ -1,4 +1,4 @@
-package cn.com.safeinfo.watchdog;
+package cn.com.safeinfo.watchdog.common.config;
 
 import io.swagger.annotations.ApiOperation;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +18,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
  */
 @Configuration
 @EnableSwagger2
-public class Swagger2 {
+public class SwaggerConfig {
 
     @Bean
     public Docket createRestApi() {

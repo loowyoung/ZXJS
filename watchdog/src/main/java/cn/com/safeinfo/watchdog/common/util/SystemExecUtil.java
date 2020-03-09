@@ -1,4 +1,4 @@
-package cn.com.safeinfo.watchdog.util;
+package cn.com.safeinfo.watchdog.common.util;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.WinNT;
@@ -6,9 +6,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import oshi.jna.platform.windows.Kernel32;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * 系统内操作工具类
@@ -66,7 +70,7 @@ public class SystemExecUtil {
             //int status = process.waitFor();
             logger.info("执行命令：{}", cmd);
             return process;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             logger.warn("执行命令失败：{}", cmd);
             return null;
@@ -89,6 +93,37 @@ public class SystemExecUtil {
             logger.warn("执行命令失败：{}", Arrays.toString(cmd));
             return null;
         }
+    }
+
+    /**
+     * 获取进程执行的结果
+     *
+     * @param process
+     * @return
+     */
+    public static List<String> getCommandResult(Process process) {
+        List<String> result = new ArrayList<>();
+        BufferedReader bufrIn;
+        BufferedReader bufrError;
+        try {
+            // 方法阻塞, 等待命令执行完成（成功会返回0）
+            int execResult = process.waitFor();
+            // 获取命令执行结果, 有两个结果: 正常的输出 和 错误的输出（PS: 子进程的输出就是主进程的输入）
+            bufrIn = new BufferedReader(new InputStreamReader(process.getInputStream(), "GBK"));
+            bufrError = new BufferedReader(new InputStreamReader(process.getErrorStream(), "GBK"));
+            // 读取输出
+            String line;
+            while ((line = bufrIn.readLine()) != null) {
+                result.add(line);
+            }
+            while ((line = bufrError.readLine()) != null) {
+                result.add(line);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("获取进程执行结果失败：{}", e.getMessage());
+        }
+        return result;
     }
 
 }

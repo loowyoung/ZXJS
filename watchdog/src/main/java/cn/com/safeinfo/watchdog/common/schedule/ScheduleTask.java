@@ -1,4 +1,4 @@
-package cn.com.safeinfo.watchdog.schedule;
+package cn.com.safeinfo.watchdog.common.schedule;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -20,6 +20,6 @@ public class ScheduleTask {
     //每10分钟执行一次
     @Scheduled(fixedRate = 10 * 60 * 1000)
     public void exec() {
-        System.out.println("每隔五秒钟执行一次： " + LocalDate.now());
+        System.out.println("每隔10分钟执行一次： " + LocalDate.now());
     }
 }

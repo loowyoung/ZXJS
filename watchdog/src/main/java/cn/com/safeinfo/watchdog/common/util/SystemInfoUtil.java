@@ -1,4 +1,4 @@
-package cn.com.safeinfo.watchdog.util;
+package cn.com.safeinfo.watchdog.common.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +10,8 @@ import oshi.hardware.HardwareAbstractionLayer;
 import oshi.software.os.OSProcess;
 import oshi.software.os.OperatingSystem;
 import oshi.util.Util;
+
+import java.util.List;
 
 import static java.lang.System.getProperty;
 
@@ -139,9 +141,36 @@ public class SystemInfoUtil {
         return null;
     }
 
-    public static int getTcpCount(Process process) {
+    public static int getTcpCount(int pid) {
+        String osName = getOsName();
+        List<String> tcpCount = null;
+        if (osName.contains("Windows")) {
+            try {
+                String cmd = "cmd /c netstat -ano | findstr 80";
+                //String[] cmd = new String[4];
+                //cmd[0] = "cmd /k";
+                //cmd[1] = "tasklist";
+                //cmd[2] = "|";
+                //cmd[3] = "findstr chrome";
+                Process process = SystemExecUtil.execCommand(cmd);
+                //Process process = new ProcessBuilder(cmd).start();
+                tcpCount = SystemExecUtil.getCommandResult(process);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            logger.info("TCP连接数：{}", tcpCount.toString());
+        } else if (osName.contains("Linux")) {
+
+        } else {
+            logger.warn("未知的操作系统：{}", osName);
+        }
         //process.
         return 0;
+    }
+
+    public static void main(String[] args) {
+        int count = getTcpCount(14596);
+        System.out.println("TCP连接数：" + count);
     }
 
 }

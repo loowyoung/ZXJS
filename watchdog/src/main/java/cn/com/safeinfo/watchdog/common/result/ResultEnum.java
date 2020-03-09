@@ -1,4 +1,4 @@
-package cn.com.safeinfo.watchdog.util.result;
+package cn.com.safeinfo.watchdog.common.result;
 
 public enum ResultEnum {
 
