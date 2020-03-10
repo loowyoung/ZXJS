@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Service_health {
+    //TODO:引入mongodb后使用此类
     private String serviceName;//服务名称
     private String serverName;//服务器名称
     private String monitoredAt;//监测时间，Linux毫秒时间戳

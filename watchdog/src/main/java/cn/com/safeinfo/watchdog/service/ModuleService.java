@@ -1,5 +1,6 @@
 package cn.com.safeinfo.watchdog.service;
 
+import cn.com.safeinfo.watchdog.common.util.FileUtil;
 import cn.com.safeinfo.watchdog.dao.ModuleDao;
 import cn.com.safeinfo.watchdog.model.entity.ModuleModel;
 import cn.com.safeinfo.watchdog.model.param.UpLoadJarParam;
@@ -31,7 +32,6 @@ import java.util.List;
 @Service
 public class ModuleService extends ServiceImpl<ModuleDao, ModuleModel> {
     private static final Logger logger = LoggerFactory.getLogger(ModuleService.class);
-    private static final String watchPath = System.getProperty("user.dir") + File.separator + "watchdog-projects";//watchdog的jar包所在路径
     @Value("${server.port}")
     private String port;//看门狗的端口
 
@@ -43,14 +43,14 @@ public class ModuleService extends ServiceImpl<ModuleDao, ModuleModel> {
      */
     public JsonResult queryModule(String moduleName) {
         ModuleModel model = this.getById(moduleName);//根据服务名查询服务
-        String pidPath = watchPath + File.separator + moduleName + ".pid";//进程号文件
+        String pidPath = FileUtil.watchPath + File.separator + moduleName + ".pid";//进程号文件
         File pidFile = new File(pidPath);
         if (null == model) {
             return ResultUtil.error(500, Status.SERVICE_NOT_FOUND.value());
         } else if ("0".equals(model.getStatus()) || !pidFile.exists()) {//程序已停止或没有进程号文件
             return ResultUtil.error(500, Status.SERVICE_STOPPED.value());//服务已停止
         }
-        String pid = readFile(pidFile);
+        String pid = FileUtil.readFile(pidFile);
         String osName = SystemInfoUtil.getOsName();
         Process process = null;//执行命令后的进程
         if (osName.contains("Windows")) {
@@ -62,16 +62,17 @@ public class ModuleService extends ServiceImpl<ModuleDao, ModuleModel> {
             cmd[2] = "jps -l | grep " + pid;
             process = SystemExecUtil.execCommand(cmd);//查询进程是否存在
         }
-        List<String> cmdResult = SystemExecUtil.getCommandResult(process);//命令的返回值
+        List<String> cmdResult = SystemExecUtil.getCommandResult(process);//启动jar包的进程号和名称
         if (null == cmdResult || cmdResult.size() != 1) {
             model.setStatus("0");//运行状态，0：停止；1：运行
             Timestamp now = new Timestamp(System.currentTimeMillis());//当前时间
             model.setUpdateTime(now);//更新时间
             this.updateById(model);
-            deleteFile(pidPath);//删除进程号文件
+            FileUtil.deleteFile(pidPath);//删除进程号文件
+            logger.info("{}模块更新状态，服务已停止", moduleName);
             return ResultUtil.error(500, Status.SERVICE_STOPPED.value());
         }
-        return ResultUtil.success(Status.SERVICE_STARTED.value());
+        return ResultUtil.success(model);
     }
 
     /**
@@ -85,24 +86,30 @@ public class ModuleService extends ServiceImpl<ModuleDao, ModuleModel> {
         ModuleModel model = this.getById(param.getServiceName());//根据服务名查询服务
         if (param.getVersion().equals(model.getVersion())) {//如果上传版本等于已有版本
             //先删除jar包，再上传新的jar包
-            deleteFile(model.getFilePath());//删除jar包
+            FileUtil.deleteFile(model.getFilePath());//删除jar包
+            logger.info("{}模块上传jar包成功，替换jar包", param.getServiceName());
         } else if (!StringUtils.isEmpty(model.getVersion())) {//如果版本号不相等且不为空
             //更改jar包名，再上传新的jar包
             if (!StringUtils.isEmpty(model.getPreviousFilePath())) {
-                deleteFile(model.getPreviousFilePath());//删除上上版本jar包
+                FileUtil.deleteFile(model.getPreviousFilePath());//删除上上版本jar包
             }
-            File previousFile = renameFile(model.getFilePath());
+            File previousFile = FileUtil.renameFile(model.getFilePath());
             model.setPreviousVersion(model.getVersion());//保存上一版本号
             model.setPreviousFilePath(previousFile.getAbsolutePath());//保存上一版本路径
+            logger.info("{}模块上传jar包成功，更新版本{}", param.getServiceName(), param.getVersion());
         } else if (null == model) {//如果服务模块不存在
+            logger.warn("{}模块上传jar包失败，服务不存在");
             return ResultUtil.error(500, Status.SERVICE_NOT_FOUND.value());
+        } else {
+            logger.info("{}模块上传jar包成功", param.getServiceName());
         }
         Timestamp now = new Timestamp(System.currentTimeMillis());//当前时间
-        File dest = upLoadFile(file);//上传jar包
+        File dest = FileUtil.upLoadFile(file);//上传jar包
         BeanUtils.copyProperties(param, model);
         model.setFilePath(dest.getAbsolutePath());//当前版本路径
-        model.setWatchdogHost(SystemInfoUtil.getHostName());
-        model.setWatchdogPort(port);
+        model.setServerName(SystemInfoUtil.getHostName());//服务器名称
+        model.setWatchdogHost(SystemInfoUtil.getIp());//看门狗ip
+        model.setWatchdogPort(port);//看门狗端口
         model.setUpdateTime(now);//更新时间
         this.updateById(model);
         return ResultUtil.success(Status.JAR_UPLOAD_SUCCESS.value());
@@ -116,18 +123,20 @@ public class ModuleService extends ServiceImpl<ModuleDao, ModuleModel> {
      */
     public JsonResult startModule(String moduleName) {
         ModuleModel model = this.getById(moduleName);//根据服务名查询服务
-        if (null == model) {
+        if (null == model) {//服务不存在
             return ResultUtil.error(500, Status.SERVICE_NOT_FOUND.value());
         }
-        String pidPath = watchPath + File.separator + moduleName + ".pid";//进程号文件
+        String pidPath = FileUtil.watchPath + File.separator + moduleName + ".pid";//进程号文件
         File pidFile = new File(pidPath);
         if (pidFile.exists()) {
-            return ResultUtil.error(500, Status.SERVICE_STARTED.value(), readFile(pidFile));//服务已启动
+            logger.info("{}模块已启动，无需再次启动", moduleName);
+            return ResultUtil.error(500, Status.SERVICE_STARTED.value(), FileUtil.readFile(pidFile));//服务已启动
         }
         String osName = SystemInfoUtil.getOsName();//系统名称
         Process process = null;//启动jar包后的进程
         File jarFile = new File(model.getFilePath());
         if (!jarFile.exists()) {
+            logger.warn("{}模块启动失败,无jar包", moduleName);
             return ResultUtil.error(500, Status.JAR_NOT_FOUND.value());//如果jar包不存在
         }
         if (osName.contains("Windows")) {
@@ -140,14 +149,16 @@ public class ModuleService extends ServiceImpl<ModuleDao, ModuleModel> {
             process = SystemExecUtil.execCommand(cmd);//启动jar包
         }
         Long pid = SystemExecUtil.getProcessID(process);//获取进程号
-        writeFile(pidFile, pid.toString());//将进程号写入进程文件
+        FileUtil.writeFile(pidFile, pid.toString());//将进程号写入进程文件
         if (pid.equals(-1)) {//如果没有进程号
+            logger.warn("{}模块启动失败,无进程号", moduleName);
             return ResultUtil.error(500, Status.SERVICE_STARTED_FAIL.value());
         } else {
             Timestamp now = new Timestamp(System.currentTimeMillis());//当前时间
             model.setStatus("1");//设置服务状态已启动
             model.setUpdateTime(now);
             this.updateById(model);
+            logger.info("{}模块启动成功", moduleName);
             return ResultUtil.success(Status.SERVICE_STARTED_SUCCESS.value());
         }
     }
@@ -162,12 +173,13 @@ public class ModuleService extends ServiceImpl<ModuleDao, ModuleModel> {
         if (null == model) {
             return ResultUtil.error(500, Status.SERVICE_NOT_FOUND.value());
         }
-        String pidPath = watchPath + File.separator + moduleName + ".pid";
+        String pidPath = FileUtil.watchPath + File.separator + moduleName + ".pid";
         File pidFile = new File(pidPath);
         if (!pidFile.exists()) {
+            logger.warn("{}模块停止失败,无进程号", moduleName);
             return ResultUtil.error(500, Status.SERVICE_STOPPED.value());//进程号文件不存在
         }
-        String pid = readFile(pidFile);//进程号
+        String pid = FileUtil.readFile(pidFile);//进程号
         String osName = SystemInfoUtil.getOsName();
         if (osName.contains("Windows")) {
             SystemExecUtil.execCommand("taskkill /pid " + pid + " -t -f");//杀进程
@@ -178,11 +190,12 @@ public class ModuleService extends ServiceImpl<ModuleDao, ModuleModel> {
             cmd[2] = "kill -9 " + pid;
             SystemExecUtil.execCommand(cmd);//杀进程
         }
-        deleteFile(pidPath);//删除存进程号文件
+        FileUtil.deleteFile(pidPath);//删除存进程号文件
         Timestamp now = new Timestamp(System.currentTimeMillis());//当前时间
         model.setStatus("0");//设置服务状态已启动
         model.setUpdateTime(now);
         this.updateById(model);
+        logger.info("{}模块停止成功", moduleName);
         return ResultUtil.success(Status.SERVICE_STOPPED_SUCCESS.value());
     }
 
@@ -193,119 +206,10 @@ public class ModuleService extends ServiceImpl<ModuleDao, ModuleModel> {
      * @return
      */
     public JsonResult restartModule(String moduleName) {
-        JsonResult stopResult = stopModule(moduleName);//停止jar包
+        logger.info("{}模块正在重启···", moduleName);
+        stopModule(moduleName);//停止jar包
         Util.sleep(1000);
         return startModule(moduleName);//启动jar包
-    }
-
-    /**
-     * 删除jar包
-     *
-     * @param jarPath
-     * @return
-     */
-    private boolean deleteFile(String jarPath) {
-        File file = new File(jarPath);
-        if (!file.exists()) {//如果文件不存在
-            return false;
-        }
-        file.delete();
-        logger.info("文件删除：{}", file.getAbsolutePath());
-        return true;
-    }
-
-    /**
-     * 重命名jar包
-     *
-     * @param jarPath
-     * @return
-     */
-    private File renameFile(String jarPath) {
-        File file = new File(jarPath);
-        if (!file.exists()) {//如果文件不存在
-            return null;
-        }
-        File newfile = new File(jarPath + ".bak");
-        file.renameTo(newfile);
-        logger.info("文件重命名：{}\n{}", file.getAbsolutePath(), newfile.getAbsolutePath());
-        return newfile;//返回更改后的文件
-    }
-
-    /**
-     * 上传jar包到服务器
-     *
-     * @param file jar包
-     * @return
-     */
-    private File upLoadFile(MultipartFile file) {
-        if (file.isEmpty()) {
-            return null;
-        }
-        String fileName = file.getOriginalFilename();
-        File dest = new File(watchPath + File.separator + fileName);
-        if (!dest.getParentFile().exists()) { //判断文件父目录是否存在
-            dest.getParentFile().mkdir();
-        }
-        try {
-            file.transferTo(dest); //保存文件
-            logger.info("文件上传：{}", dest);
-            return dest;
-        } catch (IllegalStateException | IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /**
-     * 文件写入
-     *
-     * @param file
-     * @param content
-     */
-    private void writeFile(File file, String content) {
-        FileWriter fw = null;
-        BufferedWriter bw = null;
-        try {
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-            fw = new FileWriter(file.getAbsoluteFile()); //表示不追加
-            bw = new BufferedWriter(fw);
-            bw.write(content);
-            bw.close();
-            logger.info("写入文件位置：{}，写入内容：{}", file.getAbsolutePath(), content);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 文件内容读取
-     *
-     * @param file
-     * @return
-     */
-    private String readFile(File file) {
-        FileInputStream fis;
-        InputStreamReader isr;
-        BufferedReader br;
-        StringBuilder result = new StringBuilder();//文件内容
-        try {
-            fis = new FileInputStream(file);
-            isr = new InputStreamReader(fis);
-            br = new BufferedReader(isr);
-            String data;
-            while ((data = br.readLine()) != null) {
-                result.append(data);
-            }
-            br.close();
-            isr.close();
-            fis.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        logger.info("读取文件位置：{}，文件内容：{}", file.getAbsolutePath(), result);
-        return result.toString();
     }
 
 }

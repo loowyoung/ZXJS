@@ -59,7 +59,7 @@ public class SystemInfoUtil {
         long steal = ticks[CentralProcessor.TickType.STEAL.getIndex()] - prevTicks[CentralProcessor.TickType.STEAL.getIndex()];
         long totalCpu = user + nice + sys + idle + iowait + irq + softirq + steal;
         float cpuUsage = Float.valueOf(user + sys) / Float.valueOf(totalCpu);
-        logger.info("CPU使用率：{}。CPU使用量：user-{},sys-{}，totalCpu-{}", cpuUsage, user, sys, totalCpu);
+        logger.debug("CPU使用率：{}。CPU使用量：user-{},sys-{}，totalCpu-{}", cpuUsage, user, sys, totalCpu);
         return cpuUsage;
     }
 
@@ -87,7 +87,7 @@ public class SystemInfoUtil {
         long total = memory.getTotal();
         float memoryUsage = Float.valueOf(total - available) / Float.valueOf(total);
         //使用量单位是Byte
-        logger.info("memory使用率：{}。memory使用量：available-{},total-{}", memoryUsage, available, total);
+        logger.debug("memory使用率：{}。memory使用量：available-{},total-{}", memoryUsage, available, total);
         return memoryUsage;
     }
 
@@ -101,7 +101,7 @@ public class SystemInfoUtil {
         //通过进程号获取进程
         OSProcess p = operatingSystem.getProcess(pid);
         float memoryUsage = Float.valueOf(p.getResidentSetSize()) / Float.valueOf(memory.getTotal());
-        logger.info("进程号：{},memory使用率：{},memory使用量：{}", pid, memoryUsage, p.getResidentSetSize());
+        logger.debug("进程号：{},memory使用率：{},memory使用量：{}", pid, memoryUsage, p.getResidentSetSize());
         return memoryUsage;
     }
 
@@ -123,7 +123,7 @@ public class SystemInfoUtil {
             }
         }
         float diskUsage = Float.valueOf(used) / Float.valueOf(total);
-        logger.info("磁盘使用率：{}。磁盘使用量：used-{},total-{}", diskUsage, used, total);
+        logger.debug("磁盘使用率：{}。磁盘使用量：used-{},total-{}", diskUsage, used, total);
         return diskUsage;
     }
 
@@ -150,7 +150,7 @@ public class SystemInfoUtil {
             logger.warn("未知的操作系统：{}", osName);
         }
         commandResult = SystemExecUtil.getCommandResult(process);
-        logger.info("TCP连接数：{}", commandResult.toString());
+        logger.debug("TCP连接数：{}", commandResult.toString());
         return commandResult.get(0);
     }
 
@@ -162,7 +162,7 @@ public class SystemInfoUtil {
     public static String getOsName() {
         String osName = getProperty("os.name");
         String archName = getProperty("os.arch");
-        logger.info("操作系统名称：{}。架构名称：{}", osName, archName);
+        logger.debug("操作系统名称：{}。架构名称：{}", osName, archName);
         return osName;
     }
 
@@ -179,9 +179,25 @@ public class SystemInfoUtil {
             e.printStackTrace();
         }
         String host = ia.getHostName();//获取计算机主机名
-        String IP = ia.getHostAddress();//获取计算机IP
-        logger.info("计算机主机名：{}", host);
+        logger.debug("计算机主机名：{}", host);
         return host;
+    }
+
+    /**
+     * 获取主机名称
+     *
+     * @return
+     */
+    public static String getIp() {
+        InetAddress ia = null;
+        try {
+            ia = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        String IP = ia.getHostAddress();//获取计算机IP
+        logger.debug("计算机主机IP：{}", IP);
+        return IP;
     }
 
 }

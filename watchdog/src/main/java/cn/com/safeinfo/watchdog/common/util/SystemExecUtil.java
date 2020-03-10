@@ -54,7 +54,7 @@ public class SystemExecUtil {
         } catch (Exception ex) {
             pid = -1;
         }
-        logger.info("进程号：{}", pid);
+        logger.debug("进程号：{}", pid);
         return pid;
     }
 
@@ -67,7 +67,7 @@ public class SystemExecUtil {
     public static Process execCommand(String cmd) {
         try {
             Process process = Runtime.getRuntime().exec(cmd);
-            logger.info("执行命令：{}", cmd);
+            logger.debug("执行命令：{}", cmd);
             return process;
         } catch (Exception e) {
             e.printStackTrace();
@@ -85,7 +85,7 @@ public class SystemExecUtil {
     public static Process execCommand(String[] cmd) {
         try {
             Process process = Runtime.getRuntime().exec(cmd);
-            logger.info("执行命令：{}", Arrays.toString(cmd));
+            logger.debug("执行命令：{}", Arrays.toString(cmd));
             return process;
         } catch (IOException e) {
             e.printStackTrace();
@@ -126,7 +126,7 @@ public class SystemExecUtil {
             e.printStackTrace();
             logger.warn("获取进程执行结果失败：{}", e.getMessage());
         }
-        logger.info("获取进程执行结果：{}", result);
+        logger.debug("获取进程执行结果：{}", result);
         return result;
     }
 
