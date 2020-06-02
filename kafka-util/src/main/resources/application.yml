@@ -1,0 +1,9 @@
+#kafka:
+#  servers: kafka-1:6667,kafka-2:6667,kafka-3:6667
+#  maxPollRecords: 50
+#  pollTimeoutSeconds: 1
+#  topics:
+#    - desc: 实时数据
+#      topic: testData
+#    - desc: 报警数据
+#      topic: testAlarm
