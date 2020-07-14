@@ -1,9 +1,7 @@
 package com.liuyong.licensetesting.service;
 
-import com.liuyong.licensetesting.utils.LicenseUtil;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Scanner;
@@ -14,10 +12,10 @@ import java.util.Scanner;
  * @author ly
  * @date 2020年 07月13日 19:38:12
  */
-@Service
+//@Service
 public class StartAddDataListener implements ApplicationListener<ContextRefreshedEvent> {
     @Resource
-    private LicenseUtil licenseUtil;
+    private LicenseService licenseUtil;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {

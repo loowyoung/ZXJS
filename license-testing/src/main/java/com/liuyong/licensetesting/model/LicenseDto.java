@@ -15,8 +15,10 @@ import java.time.LocalDateTime;
 public class LicenseDto {
     private String cpuId;
     private String mainboardNum;//主板
+    private String projectName;//服务名称
     private String applicant;//申请人
     private String ip;
     private String userDir;//jar包所在目录
     private LocalDateTime limitDate;//过期时间
+    private String customerName;//客户名称
 }
