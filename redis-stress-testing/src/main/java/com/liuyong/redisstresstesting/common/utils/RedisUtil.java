@@ -9,6 +9,7 @@ import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +32,7 @@ public final class RedisUtil {
      *
      * @param params
      */
-    public void redisPipeline(Map<String, Map<byte[], byte[]>> params) {
+    public void saveHashPipe(Map<String, Map<byte[], byte[]>> params) {
 //        1.executePipelined 重写 入参 RedisCallback 的doInRedis方法
         List<Object> resultList = redisTemplate.executePipelined(new RedisCallback<Object>() {
             @Override
@@ -40,8 +41,43 @@ public final class RedisUtil {
                 connection.openPipeline();
 
                 params.forEach((K, V) -> {
+                    Iterator<Map.Entry<byte[], byte[]>> it = V.entrySet().iterator();
+                    while (it.hasNext()) {
+                        Map.Entry<byte[], byte[]> entry = it.next();
+                        if (null == entry.getKey() || null == entry.getValue()) {
+                            it.remove();
+                        }
+                    }
                     connection.hashCommands().hMSet(K.getBytes(), V);
                 });
+//                4.关闭管道 不需要close 否则拿不到返回值
+//                connection.closePipeline();
+
+//                这里一定要返回null，最终pipeline的执行结果，才会返回给最外层
+                return null;
+            }
+        });
+//        5.最后对redis pipeline管道操作返回结果进行判断和业务补偿
+        for (Object str : resultList) {
+            System.out.println(String.valueOf(str));
+        }
+    }
+
+    /**
+     * 通过管道批量保存数据
+     */
+    public void saveSetPipe(String key, Set<String> values) {
+//        1.executePipelined 重写 入参 RedisCallback 的doInRedis方法
+        List<Object> resultList = redisTemplate.executePipelined(new RedisCallback<Object>() {
+            @Override
+            public String doInRedis(RedisConnection connection) throws DataAccessException {
+//                2.connection 打开管道
+                connection.openPipeline();
+
+                values.forEach(v -> {
+                    connection.setCommands().sAdd(key.getBytes(), v.getBytes());
+                });
+
 //                4.关闭管道 不需要close 否则拿不到返回值
 //                connection.closePipeline();
 
