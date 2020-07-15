@@ -25,7 +25,7 @@ public class RedisSaveService {
         long step1 = 0;
         try {
             step1 = System.currentTimeMillis();
-            for (int i = 0; i < 1; i++) {
+            for (int i = 0; i < 10; i++) {
                 //开线程，监听消费
                 int finalI = i;
                 Thread t = new Thread(() -> {
@@ -46,7 +46,7 @@ public class RedisSaveService {
     }
 
     private void save(int index) {
-        int step = 5;
+        int step = 2000;
         long step1 = System.currentTimeMillis();
         int i = index * step;//起始值
         int end = i + step;//终止值

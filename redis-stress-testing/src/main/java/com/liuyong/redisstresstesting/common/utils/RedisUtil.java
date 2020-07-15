@@ -1,13 +1,17 @@
 package com.liuyong.redisstresstesting.common.utils;
 
+import com.liuyong.redisstresstesting.common.config.RedisValueSerializer;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -23,9 +27,33 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public final class RedisUtil {
-
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
+
+    /**
+     * 通过管道批量查询hash数据
+     *
+     * @param keys
+     * @return
+     */
+    public Map<String, Map<String, String>> getHashPipe(List<String> keys) {
+        List<Object> resultList = redisTemplate.executePipelined(new RedisCallback<Object>() {
+            @Override
+            public Map<String, Map<String, String>> doInRedis(RedisConnection connection) throws DataAccessException {
+                connection.openPipeline();
+                keys.forEach(key -> {
+                    connection.hashCommands().hGetAll(key.getBytes());
+                });
+                return null;
+            }
+        });
+
+        Map<String, Map<String, String>> allData = new HashMap<>();
+        for (int i = 0; i < keys.size(); i++) {
+            allData.put(keys.get(i), (Map<String, String>) resultList.get(i));
+        }
+        return allData;
+    }
 
     /**
      * 通过管道批量保存数据

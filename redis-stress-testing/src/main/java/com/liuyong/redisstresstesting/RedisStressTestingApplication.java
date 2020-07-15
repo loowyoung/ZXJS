@@ -23,7 +23,8 @@ public class RedisStressTestingApplication implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        redisSaveService.testRedisSave();
+        //redisSaveService.testRedisSave();
         //redisGetService.find();
+        redisGetService.findByPipeline();
     }
 }
